@@ -1,88 +1,197 @@
 #!/usr/bin/env python3
 
 import itertools
-
-from collections import defaultdict
 import subprocess
 import sys
 from pathlib import Path
 
-from Bio import SeqIO
 import numpy as np
-import pandas as pd
+import pickle as p
+import plotly.express as px
+from plotly.io import to_html
+from Bio import SeqIO
 from sklearn.decomposition import PCA
 
 
-def do_pca():
-    X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
-    pca = PCA(n_components=2)
-    pca.fit(X)
-    pass
+def do_pca(X, headers, files):
+    print("Starting PCA...")
+    # setting up and fitting to the data
+    #   transposing because apparently scikit-learn PCA wants the data rotated from how I set it up
+
+    pca = PCA()
+    pca.fit(X.T)
+
+    # graph explained variance per component for first 100 components
+    fig1 = px.bar(
+        y=pca.explained_variance_ratio_
+    ).update_layout(
+        title='PCA<br>Explained Variance per Principal Component',
+        xaxis_title='principal component #',
+        yaxis_title="percent variance explained",
+        yaxis_tickformat=".1%"
+    )
+    fig1.show()
+    with open('variance-per-component.html') as fig_out:
+        fig_out.write(to_html(fig1, include_plotlyjs='cdn'))
+
+    # graph first 2 components of PCA colored by file
+    fig2 = px.scatter(
+        x=pca.components_[0],
+        y=pca.components_[1],
+        color=files,
+        hover_name=headers
+    ).update_traces(
+        marker=dict(size=4, opacity=0.8)
+    ).update_layout(
+        title='PCA<br>Visualization of First 2 Components',
+        xaxis_title='PC1',
+        yaxis_title="PC2",
+    )
+    fig2.show()
+    with open('2D-PCA.html') as fig_out:
+        fig_out.write(to_html(fig2, include_plotlyjs='cdn'))
+
+    # graph first 3 components of PCA colored by file (3D)
+    fig3 = px.scatter_3d(
+        x=pca.components_[0],
+        y=pca.components_[1],
+        z=pca.components_[2],
+        color=files,
+        hover_name=headers
+    ).update_traces(
+        marker=dict(size=4, opacity=0.4),
+    ).update_layout(
+        title='PCA<br>Visualization of First 3 Components',
+        scene=dict(
+            xaxis_title='PC1',
+            yaxis_title="PC2",
+            zaxis_title="PC3"
+        )
+    )
+    fig3.show()
+    with open('3D-PCA.html') as fig_out:
+        fig_out.write(to_html(fig3, include_plotlyjs='cdn'))
 
 
-def main():
-    # set up a pandas dataframe
+def get_kmers():
+    # set up an array and column ids
     aa = [
-        'A',
-        'R',
-        'N',
-        'D',
-        'C',
-        'Q',
-        'E',
-        'G',
-        'H',
-        'I',
-        'L',
-        'K',
-        'M',
-        'F',
-        'P',
-        'S',
-        'T',
-        'W',
-        'Y',
-        'V',
-        'B',
-        'Z',
-        'Q',
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z",
     ]
-    columns = ['header', 'file'] + list([''.join(x) for x in itertools.product(aa, repeat=3)])
-    df = pd.DataFrame(columns=columns)
+    possible_kmers = list(["".join(x) for x in itertools.product(aa, repeat=3)])
+    array = np.empty(shape=(0, len(possible_kmers)), dtype='int')
+    headers_column = []
+    files_column = []
 
     # get all fasta files in the current directory
-    for file in Path().glob("*.fasta"):
+    for file in Path().glob("sequences/*.fasta"):
+        with open(file) as f:
+            row_size = sum(1 for line in f if line.startswith(">"))
+        temp_array = np.zeros([row_size, len(possible_kmers)])
 
         with open(file) as handle:
+            cur_row = 0
+            ii = 0
             # parse each fasta record
             for record in SeqIO.parse(handle, "fasta"):
-
-                # set up a dictionary to store 3-mer counts
-                kmer_dict = {x: 0 for x in columns}
-                kmer_dict['header'] = record.name
-                kmer_dict['file'] = file.stem
+                if ii % 20 == 0:
+                    print(f'file: {file.name}\tparsing record: {ii}')
+                ii += 1
 
                 # run the shell script to get 3-mers
-                kmer_str = subprocess.run(
+                kmer_out = subprocess.run(
                     ["./get-kmers.sh", record.seq.__str__()],
                     universal_newlines=True,
                     capture_output=True,
-                    text=True
-                ).stdout
+                    text=True,
+                )
+                # raise an error if it failed
+                if kmer_out.stderr:
+                    raise RuntimeError(kmer_out.stderr)
 
-                kmer_list = kmer_str.split("\n")
+                # get the output 3-mer list, drop the last two partial 3-mers
+                kmer_list = kmer_out.stdout.split("\n")[:-3]
 
-                # add the 3-mers to the count dict.
+                # add 3-mer count values to the array
                 for kmer in kmer_list:
-                    try:
-                        kmer_dict[kmer] += 1
-                    except KeyError:
-                        pass
+                    # get the column index for insertion
+                    col_index = possible_kmers.index(kmer)
 
-                # add the dict values to the data frame
-                df.loc[len(df)] = kmer_dict
+                    # increment the cell by 1
+                    temp_array[cur_row, col_index] += 1
 
-    print()
+                # also track header and file for this row
+                headers_column.append(record.description)
+                files_column.append(file.stem)
+
+                # increment to the next row
+                cur_row += 1
+
+        # concat temp array for the current file into the full array
+        array = np.concatenate((array, temp_array), axis=0)
+
+        # free up memory
+        del temp_array
+
+    # convert counts to relative frequencies
+    # this takes the sum across each row, converts that from shape (x, ) to shape (x, 1), then divides the original
+    # array by this column row-wise
+    array = array / array.sum(axis=1)[:, None]
+
+    return array, headers_column, files_column
+
+
+def main():
+    # get the 3-mer array
+    load = True
+
+    if not load:
+        X, headers, files = get_kmers()
+
+    with open('array.p', 'rb' if load else 'wb') as obj1:
+        if load:
+            X = p.load(obj1)
+        else:
+            p.dump(X, obj1)
+
+    with open('headers.p', 'rb' if load else 'wb') as obj2:
+        if load:
+            headers = p.load(obj2)
+        else:
+            p.dump(headers, obj2)
+
+    with open('files.p', 'rb' if load else 'wb') as obj3:
+        if load:
+            files = p.load(obj3)
+        else:
+            p.dump(files, obj3)
+
+
+    # do the PCA
+    do_pca(X, headers, files)
 
 
 if __name__ == "__main__":
