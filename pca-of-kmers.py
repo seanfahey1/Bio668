@@ -7,69 +7,67 @@ from pathlib import Path
 
 import numpy as np
 import plotly.express as px
-from plotly.io import to_html
 from Bio import SeqIO
+from plotly.io import to_html
 from sklearn.decomposition import PCA
 
 
 def do_pca(X, headers, files):
     print("Starting PCA..")
     # setting up and fitting to the data
-    #   transposing because apparently scikit-learn PCA wants the data rotated from how I set it up
+    #   transposing because apparently scikit-learn PCA wants the data rotated
+    #   from how I set it up
 
     pca = PCA()
     pca.fit(X.T)
 
     # graph explained variance per component for first 100 components
-    fig1 = px.bar(
-        y=pca.explained_variance_ratio_
-    ).update_layout(
-        title='PCA<br>Explained Variance per Principal Component',
-        xaxis_title='principal component #',
+    fig1 = px.bar(y=pca.explained_variance_ratio_).update_layout(
+        title="PCA<br>Explained Variance per Principal Component",
+        xaxis_title="principal component #",
         yaxis_title="percent variance explained",
-        yaxis_tickformat=".1%"
+        yaxis_tickformat=".1%",
     )
     fig1.show()
-    with open('plots/variance-per-component.html', 'w') as fig_out:
-        fig_out.write(to_html(fig1, include_plotlyjs='cdn'))
+    with open("plots/variance-per-component.html", "w") as fig_out:
+        fig_out.write(to_html(fig1, include_plotlyjs="cdn"))
 
     # graph first 2 components of PCA colored by file
-    fig2 = px.scatter(
-        x=pca.components_[0],
-        y=pca.components_[1],
-        color=files,
-        hover_name=headers
-    ).update_traces(
-        marker=dict(size=4, opacity=0.8)
-    ).update_layout(
-        title='PCA<br>Visualization of First 2 Components',
-        xaxis_title='PC1',
-        yaxis_title="PC2",
+    fig2 = (
+        px.scatter(
+            x=pca.components_[0], y=pca.components_[1], color=files, hover_name=headers
+        )
+        .update_traces(marker=dict(size=4, opacity=0.8))
+        .update_layout(
+            title="PCA<br>Visualization of First 2 Components",
+            xaxis_title="PC1",
+            yaxis_title="PC2",
+        )
     )
     fig2.show()
-    with open('plots/2D-PCA.html', 'w') as fig_out:
-        fig_out.write(to_html(fig2, include_plotlyjs='cdn'))
+    with open("plots/2D-PCA.html", "w") as fig_out:
+        fig_out.write(to_html(fig2, include_plotlyjs="cdn"))
 
     # graph first 3 components of PCA colored by file (3D)
-    fig3 = px.scatter_3d(
-        x=pca.components_[0],
-        y=pca.components_[1],
-        z=pca.components_[2],
-        color=files,
-        hover_name=headers
-    ).update_traces(
-        marker=dict(size=4, opacity=0.4),
-    ).update_layout(
-        title='PCA<br>Visualization of First 3 Components',
-        scene=dict(
-            xaxis_title='PC1',
-            yaxis_title="PC2",
-            zaxis_title="PC3"
+    fig3 = (
+        px.scatter_3d(
+            x=pca.components_[0],
+            y=pca.components_[1],
+            z=pca.components_[2],
+            color=files,
+            hover_name=headers,
+        )
+        .update_traces(
+            marker=dict(size=4, opacity=0.4),
+        )
+        .update_layout(
+            title="PCA<br>Visualization of First 3 Components",
+            scene=dict(xaxis_title="PC1", yaxis_title="PC2", zaxis_title="PC3"),
         )
     )
     fig3.show()
-    with open('plots/3D-PCA.html', 'w') as fig_out:
-        fig_out.write(to_html(fig3, include_plotlyjs='cdn'))
+    with open("plots/3D-PCA.html", "w") as fig_out:
+        fig_out.write(to_html(fig3, include_plotlyjs="cdn"))
 
 
 def get_kmers():
@@ -102,8 +100,8 @@ def get_kmers():
         "Y",
         "Z",
     ]
-    possible_kmers = list(["".join(x) for x in itertools.product(aa, repeat=3)])
-    array = np.empty(shape=(0, len(possible_kmers)), dtype='int')
+    possible_kmers = ["".join(x) for x in itertools.product(aa, repeat=3)]
+    array = np.empty(shape=(0, len(possible_kmers)), dtype="int")
     headers_column = []
     files_column = []
 
@@ -119,7 +117,7 @@ def get_kmers():
             # parse each fasta record
             for record in SeqIO.parse(handle, "fasta"):
                 if ii % 20 == 0:
-                    print(f'file: {file.name}\tparsing record: {ii}')
+                    print(f"file: {file.name}\tparsing record: {ii}")
                 ii += 1
 
                 # run the shell script to get 3-mers
@@ -158,8 +156,8 @@ def get_kmers():
         del temp_array
 
     # convert counts to relative frequencies
-    # this takes the sum across each row, converts that from shape (x, ) to shape (x, 1), then divides the original
-    # array by this column row-wise
+    # this takes the sum across each row, converts that from shape (x, ) to
+    # shape (x, 1), then divides the original array by this column row-wise
     array = array / array.sum(axis=1)[:, None]
 
     return array, headers_column, files_column
@@ -167,8 +165,8 @@ def get_kmers():
 
 def main():
     # create sequences,  and plots directories if they don't exist
-    Path('plots/').mkdir(exist_ok=True)
-    Path('sequences/').mkdir(exist_ok=True)
+    Path("plots/").mkdir(exist_ok=True)
+    Path("sequences/").mkdir(exist_ok=True)
 
     # get the 3-mer array
     X, headers, files = get_kmers()
