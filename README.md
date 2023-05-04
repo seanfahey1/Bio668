@@ -4,7 +4,8 @@
 ### <u>Sections</u>
 - [Bio668](#bio668)
 - [Assignment](#assignment)
-- [Setup](#setup)- [Input Data](#input-data)
+- [Setup](#setup)- 
+- [Input Data](#input-data)
 - [Output](#output)
 
 <hr>
