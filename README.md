@@ -4,8 +4,9 @@
 ### <u>Sections</u>
 - [Bio668](#bio668)
 - [Assignment](#assignment)
-- [Instructions](#setup)
+- [Setup](#setup)
 - [Output](#output)
+- [Input Data](#input-data)
 
 <hr>
 
@@ -20,7 +21,8 @@ Due May 11th 2023
 <hr>
 
 ## Setup
-Run the following commands to create a virtual environment:
+Navigate to the directory you want to store the code and plots in. Then run the following commands to create a virtual 
+environment:
 
 ```bash 
 git clone https://github.com/seanfahey1/Bio668.git
@@ -36,7 +38,7 @@ cd Bio668
 
 Next, add additional .fasta formatted files to the `sequences` directory (or remove unwanted files).
 
-Then run the following command to produce the 3-mer PCA plots:
+Finally, run the following command to produce the 3-mer PCA plots:
 
 ```bash 
 ./pca-of-kmers.py
@@ -57,3 +59,11 @@ can be found in the `plots` folder:
 - `variance-per-component.html` - A bar plot of the % of variance explained by each principal component.
 - `2D-PCA.html` - The first 2 principal components.
 - `3D-PCA.html` - The first 3 principal components plotted in a 3D scatterplot.
+
+<hr>
+
+## Input Data
+
+Four `.fasta` files are included for different classifications of phage structural proteins. These can be substituted 
+for any fasta formatted files of protein sequences. The title of the file will be used for the color labels and legend 
+of the output plots. 
