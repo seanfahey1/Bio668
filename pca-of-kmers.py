@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 import numpy as np
-import pickle as p
 import plotly.express as px
 from plotly.io import to_html
 from Bio import SeqIO
@@ -172,25 +171,7 @@ def main():
     Path('sequences/').mkdir(exist_ok=True)
 
     # get the 3-mer array
-    load = False
-
-    if load:
-        with open('array.p', 'rb') as obj1:
-            X = p.load(obj1)
-        with open('headers.p', 'rb') as obj2:
-            headers = p.load(obj2)
-        with open('files.p', 'rb') as obj3:
-            files = p.load(obj3)
-
-    else:
-        X, headers, files = get_kmers()
-
-        with open('array.p', 'wb') as obj1:
-            p.dump(X, obj1)
-        with open('headers.p', 'wb') as obj2:
-            p.dump(headers, obj2)
-        with open('files.p', 'wb') as obj3:
-            p.dump(files, obj3)
+    X, headers, files = get_kmers()
 
     # do the PCA
     do_pca(X, headers, files)
