@@ -4,9 +4,8 @@
 ### <u>Sections</u>
 - [Bio668](#bio668)
 - [Assignment](#assignment)
-- [Setup](#setup)
+- [Setup](#setup)- [Input Data](#input-data)
 - [Output](#output)
-- [Input Data](#input-data)
 
 <hr>
 
@@ -46,6 +45,14 @@ Finally, run the following command to produce the 3-mer PCA plots:
 
 <hr>
 
+## Input Data
+
+Four `.fasta` files are included for different classifications of phage structural proteins. These can be substituted 
+for any fasta formatted files of protein sequences. The title of the file will be used for the color labels and legend 
+of the output plots. 
+
+<hr>
+
 ## Output
 
 The python code opens each `.fasta` file in the `sequences` directory and calls the `get-kmers.sh` shell script. This 
@@ -59,11 +66,3 @@ can be found in the `plots` folder:
 - `variance-per-component.html` - A bar plot of the % of variance explained by each principal component.
 - `2D-PCA.html` - The first 2 principal components.
 - `3D-PCA.html` - The first 3 principal components plotted in a 3D scatterplot.
-
-<hr>
-
-## Input Data
-
-Four `.fasta` files are included for different classifications of phage structural proteins. These can be substituted 
-for any fasta formatted files of protein sequences. The title of the file will be used for the color labels and legend 
-of the output plots. 
