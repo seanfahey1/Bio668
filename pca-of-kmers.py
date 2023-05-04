@@ -14,7 +14,7 @@ from sklearn.decomposition import PCA
 
 
 def do_pca(X, headers, files):
-    print("Starting PCA...")
+    print("Starting PCA..")
     # setting up and fitting to the data
     #   transposing because apparently scikit-learn PCA wants the data rotated from how I set it up
 
@@ -31,7 +31,7 @@ def do_pca(X, headers, files):
         yaxis_tickformat=".1%"
     )
     fig1.show()
-    with open('variance-per-component.html') as fig_out:
+    with open('variance-per-component.html', 'w') as fig_out:
         fig_out.write(to_html(fig1, include_plotlyjs='cdn'))
 
     # graph first 2 components of PCA colored by file
@@ -48,7 +48,7 @@ def do_pca(X, headers, files):
         yaxis_title="PC2",
     )
     fig2.show()
-    with open('2D-PCA.html') as fig_out:
+    with open('2D-PCA.html', 'w') as fig_out:
         fig_out.write(to_html(fig2, include_plotlyjs='cdn'))
 
     # graph first 3 components of PCA colored by file (3D)
@@ -69,11 +69,13 @@ def do_pca(X, headers, files):
         )
     )
     fig3.show()
-    with open('3D-PCA.html') as fig_out:
+    with open('3D-PCA.html', 'w') as fig_out:
         fig_out.write(to_html(fig3, include_plotlyjs='cdn'))
 
 
 def get_kmers():
+    print("Getting 3-mers..")
+
     # set up an array and column ids
     aa = [
         "A",
@@ -166,29 +168,25 @@ def get_kmers():
 
 def main():
     # get the 3-mer array
-    load = True
+    load = False
 
-    if not load:
+    if load:
+        with open('array.p', 'rb') as obj1:
+            X = p.load(obj1)
+        with open('headers.p', 'rb') as obj2:
+            headers = p.load(obj2)
+        with open('files.p', 'rb') as obj3:
+            files = p.load(obj3)
+
+    else:
         X, headers, files = get_kmers()
 
-    with open('array.p', 'rb' if load else 'wb') as obj1:
-        if load:
-            X = p.load(obj1)
-        else:
+        with open('array.p', 'wb') as obj1:
             p.dump(X, obj1)
-
-    with open('headers.p', 'rb' if load else 'wb') as obj2:
-        if load:
-            headers = p.load(obj2)
-        else:
+        with open('headers.p', 'wb') as obj2:
             p.dump(headers, obj2)
-
-    with open('files.p', 'rb' if load else 'wb') as obj3:
-        if load:
-            files = p.load(obj3)
-        else:
+        with open('files.p', 'wb') as obj3:
             p.dump(files, obj3)
-
 
     # do the PCA
     do_pca(X, headers, files)
