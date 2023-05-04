@@ -2,10 +2,10 @@
 [Bio668](https://kelleybioinfo.org/algorithms/about/about.php) @ SDSU final project submission
 
 ### <u>Sections</u>
-- [Bio668](#Bio668)
-- [Assignment](##Assignment)
-- [Instructions](##Setup)
-- [Output](##Output)
+- [Bio668](#bio668)
+- [Assignment](#assignment)
+- [Instructions](#setup)
+- [Output](#output)
 
 <hr>
 
