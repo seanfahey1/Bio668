@@ -39,7 +39,7 @@ Next, add additional .fasta formatted files to the `sequences` directory (or rem
 Then run the following command to produce the 3-mer PCA plots:
 
 ```bash 
-./get-kmers.py
+./pca-of-kmers.py
 ```
 
 <hr>
