@@ -9,7 +9,7 @@
 
 <hr>
 
-##Assignment 
+## Assignment 
 
 Due May 11th 2023
 
@@ -19,7 +19,7 @@ Due May 11th 2023
 
 <hr>
 
-##Setup
+## Setup
 Run the following commands to create a virtual environment:
 
 ```bash 
@@ -44,7 +44,7 @@ Then run the following command to produce the 3-mer PCA plots:
 
 <hr>
 
-##Output
+## Output
 
 The python code opens each `.fasta` file in the `sequences` directory and calls the `get-kmers.sh` shell script. This 
 collects a list of all 3-mers present in each sequence present in the file using a sliding window. The relative 
