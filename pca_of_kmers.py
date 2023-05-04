@@ -21,6 +21,8 @@ def do_pca(X, headers, files):
     pca = PCA()
     pca.fit(X.T)
 
+    print("Plotting PCA results..")
+
     # graph explained variance per component for first 100 components
     fig1 = px.bar(y=pca.explained_variance_ratio_).update_layout(
         title="PCA<br>Explained Variance per Principal Component",
@@ -160,7 +162,7 @@ def get_kmers():
     # shape (x, 1), then divides the original array by this column row-wise
     array = array / array.sum(axis=1)[:, None]
 
-    return array, headers_column, files_column
+    return array, headers_column, files_column, possible_kmers
 
 
 def main():
@@ -169,7 +171,7 @@ def main():
     Path("sequences/").mkdir(exist_ok=True)
 
     # get the 3-mer array
-    X, headers, files = get_kmers()
+    X, headers, files, _ = get_kmers()
 
     # do the PCA
     do_pca(X, headers, files)
@@ -177,3 +179,6 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+
+# ipynb
+# rf feature imp.

@@ -7,6 +7,7 @@
 - [Setup](#setup)
 - [Input Data](#input-data)
 - [Output](#output)
+- [Notebook](#notebook)
 
 <hr>
 
@@ -67,3 +68,10 @@ can be found in the `plots` folder:
 - `variance-per-component.html` - A bar plot of the % of variance explained by each principal component.
 - `2D-PCA.html` - The first 2 principal components.
 - `3D-PCA.html` - The first 3 principal components plotted in a 3D scatterplot.
+
+<hr>
+
+## Notebook
+
+The repo also includes an ipython jupyter notebook that can be used to run the code piece by piece. The notebook also
+includes a random forest classifier model and plots the feature importance scores for the top 50 most important 3-mers.
